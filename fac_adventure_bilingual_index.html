@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>法文系館大冒險 · L'Aventure de la Fac de Français</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── WARM (ZH) THEME ── */
+:root[data-lang="zh"] {
+  --bg:#080603;--bg2:#0e0b07;--bg3:#14100a;
+  --border:#2e2010;--border2:#4a3218;
+  --gold:#d4a843;--gold2:#e8c97a;
+  --text:#c8b490;--text2:#8a7055;--text3:#504030;
+  --green:#5a9a78;--green2:#3a6a50;
+  --red:#9a4a3a;--paper:#1a1408;
+  --player-color:#7ab8a8;--player-border:#2a5848;
+  --accent:#7a5a28;
+}
+/* ── COOL (FR) THEME ── */
+:root[data-lang="fr"] {
+  --bg:#04060a;--bg2:#080c14;--bg3:#0c1220;
+  --border:#1a2540;--border2:#2e4070;
+  --gold:#8bafd4;--gold2:#b8d4f0;
+  --text:#a8c0e0;--text2:#5a7898;--text3:#304060;
+  --green:#5a8aa8;--green2:#3a6080;
+  --red:#6a7fa8;--paper:#060a12;
+  --player-color:#7ab0d8;--player-border:#2a5888;
+  --accent:#4a90c8;
+}
+
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'IM Fell English',Georgia,serif;
+  font-size:16px;line-height:1.6;
+  overflow-x:hidden;
+  transition:background .4s,color .4s;
+}
+
+/* nebula bg for FR */
+:root[data-lang="fr"] body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(1px 1px at 10% 15%,rgba(200,216,240,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 30% 40%,rgba(200,216,240,.3) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 8%,rgba(200,216,240,.6) 0%,transparent 100%),
+    radial-gradient(1px 1px at 75% 25%,rgba(200,216,240,.4) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 88% 50%,rgba(200,216,240,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 20% 75%,rgba(200,216,240,.3) 0%,transparent 100%),
+    radial-gradient(1px 1px at 60% 80%,rgba(200,216,240,.4) 0%,transparent 100%),
+    radial-gradient(ellipse at 30% 20%,rgba(42,90,136,.07) 0%,transparent 50%),
+    radial-gradient(ellipse at 70% 80%,rgba(74,144,200,.05) 0%,transparent 50%),
+    linear-gradient(180deg,#04060a 0%,#060814 40%,#04060a 100%);
+  pointer-events:none;z-index:0;
+}
+
+#app{
+  display:grid;grid-template-rows:auto 1fr auto auto;
+  height:100vh;max-width:820px;margin:0 auto;
+  border-left:1px solid var(--border);border-right:1px solid var(--border);
+  position:relative;z-index:1;
+  background:rgba(0,0,0,.05);
+  transition:border-color .4s;
+}
+
+/* ── HEADER ── */
+#header{
+  background:var(--bg2);border-bottom:1px solid var(--border2);
+  padding:12px 24px 10px;
+  transition:background .4s,border-color .4s;
+}
+#title-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:12px}
+#title-block{flex:1;min-width:0}
+#game-title{
+  font-family:'Cinzel',serif;font-size:15px;font-weight:600;
+  color:var(--gold2);letter-spacing:2px;
+  text-shadow:0 0 18px rgba(212,168,67,.3);
+  transition:color .4s;
+}
+#game-subtitle{font-size:11px;color:var(--text2);font-style:italic;letter-spacing:1px;margin-top:2px}
+
+/* header right: lang btn + restart */
+#header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* LANGUAGE SWITCHER */
+#lang-btn{
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;
+  padding:4px 14px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--gold);color:var(--gold2);
+  background:var(--paper);
+  transition:all .2s;
+  white-space:nowrap;
+}
+#lang-btn:hover{background:var(--border2);box-shadow:0 0 8px rgba(212,168,67,.2)}
+
+/* lang transition flash */
+#app.lang-switch{animation:langFlash .35s ease;}
+@keyframes langFlash{
+  0%{opacity:1}40%{opacity:.15}100%{opacity:1}
+}
+
+#restart-btn{
+  font-family:'Special Elite',monospace;font-size:11px;letter-spacing:1px;
+  padding:4px 12px;background:transparent;border:1px solid var(--border2);
+  color:var(--text2);cursor:pointer;border-radius:2px;transition:all .15s;
+  white-space:nowrap;
+}
+#restart-btn:hover{color:var(--gold2);border-color:var(--accent)}
+
+#status-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{
+  font-family:'Special Elite',monospace;font-size:11px;padding:2px 10px;
+  border:1px solid var(--border);border-radius:2px;color:var(--text2);
+  background:var(--bg3);transition:background .4s,border-color .4s;
+}
+.pill.hi{border-color:var(--border2);color:var(--gold)}
+.pill.side{border-color:var(--green2);color:var(--green);display:none}
+
+/* ── LOG ── */
+#log{overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+#log::-webkit-scrollbar{width:5px}
+#log::-webkit-scrollbar-track{background:var(--bg2)}
+#log::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.msg{line-height:1.75;font-size:15px}
+.msg.gm{color:var(--text);padding-left:14px;border-left:2px solid var(--border2)}
+.msg.player{color:var(--player-color);font-style:italic;font-size:13px;padding-left:14px;border-left:2px solid var(--player-border)}
+.msg.sys{color:var(--text3);font-size:12px;font-style:italic;text-align:center;padding:4px 0}
+.msg.warn{color:var(--red);font-size:13px;text-align:center;font-style:italic}
+.msg.ok{color:var(--green);font-size:13px;text-align:center}
+
+/* ── INVENTORY ── */
+#inv-section{
+  background:var(--bg2);border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);padding:8px 24px;
+  transition:background .4s;
+}
+#inv-label{font-family:'Special Elite',monospace;font-size:11px;color:var(--text3);letter-spacing:1.5px;margin-bottom:6px}
+#inv-chips{display:flex;gap:6px;flex-wrap:wrap;min-height:24px;align-items:center}
+.chip{font-family:'Special Elite',monospace;font-size:11px;padding:3px 10px;border-radius:2px;letter-spacing:.5px}
+.chip.item{border:1px solid var(--border2);color:var(--gold2);background:var(--paper)}
+.chip.side{border:1px solid var(--green2);color:var(--green);background:var(--paper)}
+.chip.empty{border:1px solid var(--border);color:var(--text3);font-style:italic}
+
+/* ── INPUT ── */
+#input-area{
+  display:flex;padding:12px 24px;
+  background:var(--bg2);border-top:1px solid var(--border2);
+  transition:background .4s;
+}
+#user-input{
+  flex:1;background:var(--bg3);border:1px solid var(--border2);border-right:none;
+  color:var(--text);font-family:'IM Fell English',serif;font-size:15px;
+  padding:9px 14px;outline:none;border-radius:2px 0 0 2px;transition:border-color .15s;
+}
+#user-input::placeholder{color:var(--text3);font-style:italic}
+#user-input:focus{border-color:var(--accent)}
+#send-btn{
+  background:var(--paper);border:1px solid var(--border2);color:var(--gold2);
+  font-family:'Special Elite',monospace;font-size:13px;padding:9px 20px;
+  cursor:pointer;border-radius:0 2px 2px 0;letter-spacing:1px;
+  transition:background .15s;white-space:nowrap;
+}
+#send-btn:hover{background:var(--border)}
+
+/* ── CHOICES ── */
+.choices{display:flex;flex-direction:column;gap:6px;margin-top:8px;padding-left:14px;border-left:2px solid var(--border)}
+.choice-btn{
+  font-family:'IM Fell English',serif;font-size:14px;text-align:left;
+  padding:6px 12px;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;border-radius:2px;transition:all .15s;
+}
+.choice-btn:hover{border-color:var(--border2);color:var(--text);background:var(--paper)}
+
+/* ── ITEM REFS ── */
+.ir{color:var(--gold2);font-weight:600}
+.sr{color:var(--green);font-weight:600}
+
+/* ── VICTORY ── */
+#victory{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.9);z-index:100;
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;padding:40px;text-align:center;
+}
+#victory.show{display:flex}
+#victory h2{font-family:'Cinzel',serif;color:var(--gold2);font-size:28px;letter-spacing:3px;text-shadow:0 0 30px rgba(212,168,67,.5)}
+#victory p{color:var(--text);font-size:15px;font-style:italic;max-width:440px}
+#victory button{
+  font-family:'Cinzel',serif;font-size:13px;letter-spacing:1.5px;
+  padding:10px 28px;background:transparent;border:1px solid var(--gold);
+  color:var(--gold2);cursor:pointer;border-radius:2px;margin-top:10px;transition:all .15s;
+}
+#victory button:hover{background:var(--paper)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div id="title-row">
+      <div id="title-block">
+        <div id="game-title">⚜ 法文系館大冒險</div>
+        <div id="game-subtitle">L'Aventure de la Fac de Français</div>
+      </div>
+      <div id="header-actions">
+        <button id="lang-btn" onclick="switchLang()">🇫🇷 Français</button>
+        <button id="restart-btn" onclick="restartGame()">↺ <span id="restart-label">重新開始</span></button>
+      </div>
+    </div>
+    <div id="status-bar">
+      <span class="pill hi" id="loc-pill">📍 1F 大門</span>
+      <span class="pill" id="prog-pill">🔑 主線進行中</span>
+      <span class="pill side" id="side-pill">✦ 支線進行中</span>
+    </div>
+  </div>
+
+  <div id="log"></div>
+
+  <div id="inv-section">
+    <div id="inv-label">▸ <span id="inv-label-text">背包 INVENTAIRE</span></div>
+    <div id="inv-chips"><span class="chip empty" id="inv-empty">— 空無一物 —</span></div>
+  </div>
+
+  <div id="input-area">
+    <input id="user-input" type="text" placeholder="輸入行動，或點選下方選項…" autocomplete="off"/>
+    <button id="send-btn" onclick="handleInput()"><span id="send-label">傳送</span> ▶</button>
+  </div>
+</div>
+
+<div id="victory">
+  <h2 id="victory-title">✦ 恭喜通關 ✦</h2>
+  <p id="victory-body">法文系館的謎霧終於散去⋯⋯<br>你通過了一切考驗，順利抵達系辦，<br>完成了這場不可思議的冒險。</p>
+  <p style="font-size:13px;color:var(--text2);margin-top:8px"><em>Tu as traversé tous les mystères du département.</em></p>
+  <button onclick="restartGame()" id="replay-btn">↺ 再玩一次</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  LANGUAGE
+// ═══════════════════════════════════════════
+let LANG = 'zh'; // 'zh' | 'fr'
+
+const UI_TEXT = {
+  zh: {
+    title:'⚜ 法文系館大冒險',
+    langBtn:'🇫🇷 Français',
+    restart:'重新開始',
+    invLabel:'背包 INVENTAIRE',
+    invEmpty:'— 空無一物 —',
+    send:'傳送',
+    inputPlaceholder:'輸入行動，或點選下方選項…',
+    progMain:'🔑 主線進行中',
+    progSign:'🔑 持有簽名',
+    progWin:'🏆 通關！',
+    sideQuest:'✦ 支線進行中',
+    victoryTitle:'✦ 恭喜通關 ✦',
+    victoryBody:'法文系館的謎霧終於散去⋯⋯<br>你通過了一切考驗，順利抵達系辦，<br>完成了這場不可思議的冒險。',
+    replay:'↺ 再玩一次',
+  },
+  fr: {
+    title:'⚜ L\'Aventure de la Fac de Français',
+    langBtn:'🇹🇼 中文',
+    restart:'Recommencer',
+    invLabel:'INVENTAIRE',
+    invEmpty:'— vide —',
+    send:'Agir',
+    inputPlaceholder:'Entrez une action, ou choisissez une option ci-dessous…',
+    progMain:'🔑 Quête principale en cours',
+    progSign:'🔑 Signature obtenue',
+    progWin:'🏆 Victoire !',
+    sideQuest:'✦ Quête secondaire en cours',
+    victoryTitle:'✦ Victoire ✦',
+    victoryBody:'Les brumes mystérieuses de la Fac de Français se dissipent enfin…<br>Vous avez surmonté toutes les épreuves et êtes parvenu au Secrétariat.',
+    replay:'↺ Rejouer',
+  }
+};
+
+function t(key){ return UI_TEXT[LANG][key]; }
+
+function applyLangUI(){
+  document.documentElement.setAttribute('data-lang', LANG);
+  document.getElementById('game-title').textContent = t('title');
+  document.getElementById('lang-btn').textContent = t('langBtn');
+  document.getElementById('restart-label').textContent = t('restart');
+  document.getElementById('inv-label-text').textContent = t('invLabel');
+  document.getElementById('send-label').textContent = t('send');
+  document.getElementById('user-input').placeholder = t('inputPlaceholder');
+  document.getElementById('victory-title').textContent = t('victoryTitle');
+  document.getElementById('victory-body').innerHTML = t('victoryBody');
+  document.getElementById('replay-btn').textContent = t('replay');
+  updateUI();
+}
+
+function switchLang(){
+  LANG = (LANG === 'zh') ? 'fr' : 'zh';
+  // flash animation
+  const app = document.getElementById('app');
+  app.classList.add('lang-switch');
+  setTimeout(()=>app.classList.remove('lang-switch'), 400);
+  applyLangUI();
+  // replay the game in new language
+  restartGame();
+}
+
+// ═══════════════════════════════════════════
+//  ITEMS  (language-keyed)
+// ═══════════════════════════════════════════
+const ITEMS_ZH = {
+  CROISSANT:'可頌', PAPER:'空白資料', PEN:'羽毛筆', KEY:'黃銅鑰匙',
+  NOTES:'希臘羅馬神話筆記', SIGN:'Tanguy簽名',
+  BOVARY_NOTES:'包法利夫人小說考試重點',
+  EXAM_PASS:'期末考及格考卷',
+  BUFFET:'法文系Buffet免費券'
+};
+const ITEMS_FR = {
+  CROISSANT:'🥐 Croissant', PAPER:'📄 Feuille Vierge', PEN:'🪶 Plume de Laiton',
+  KEY:'🗝️ Clé de Laiton', NOTES:'📖 Notes de Mythologie Gréco-Romaine',
+  SIGN:'✍️ Signature de Tanguy',
+  BOVARY_NOTES:"📝 Notes d'Examen — Madame Bovary",
+  EXAM_PASS:"📜 Copie d'Examen Réussie",
+  BUFFET:'🎫 Bon Buffet Gratuit du Département'
+};
+
+function ITEMS(){ return LANG==='zh' ? ITEMS_ZH : ITEMS_FR; }
+const SIDE_KEYS = ['BOVARY_NOTES','EXAM_PASS','BUFFET'];
+function isSide(name){ return SIDE_KEYS.some(k=>ITEMS()[k]===name); }
+
+// ═══════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════
+let inv = [];
+let loc = '1F大門';
+let trapped216=false, thomasHelped=false, tanguyDone=false;
+let exam103Done=false, bovarySide=false, examSide=false, oralSide=false;
+let buffetUsed=false, pendingChoice=null;
+let tanguyQuizActive=false, tanguyQuizQueue=[], tanguyCorrect=0, tanguyAnswered=0;
+const TANGUY_PASS=3, TANGUY_TOTAL=10;
+
+// ═══════════════════════════════════════════
+//  DOM
+// ═══════════════════════════════════════════
+const logEl    = document.getElementById('log');
+const inputEl  = document.getElementById('user-input');
+const locPill  = document.getElementById('loc-pill');
+const progPill = document.getElementById('prog-pill');
+const sidePill = document.getElementById('side-pill');
+const invChips = document.getElementById('inv-chips');
+
+function ir(name){ return `<span class="ir">[${name}]</span>`; }
+function sr(name){ return `<span class="sr">[${name}]</span>`; }
+function itemRef(name){ return isSide(name)?sr(name):ir(name); }
+
+function msg(html, type='gm'){
+  const d=document.createElement('div');
+  d.className='msg '+type;
+  d.innerHTML=html;
+  logEl.appendChild(d);
+  logEl.scrollTop=logEl.scrollHeight;
+  return d;
+}
+
+function showChoices(opts){
+  pendingChoice=opts;
+  const wrap=document.createElement('div');
+  wrap.className='choices'; wrap.id='choices-wrap';
+  opts.forEach((o,idx)=>{
+    const b=document.createElement('button');
+    b.className='choice-btn';
+    b.textContent=(idx+1)+'. '+o.text;
+    b.onclick=()=>{ wrap.remove(); pendingChoice=null; msg('▷ '+o.text,'player'); o.fn(); };
+    wrap.appendChild(b);
+  });
+  logEl.appendChild(wrap);
+  logEl.scrollTop=logEl.scrollHeight;
+}
+
+function updateUI(){
+  // location pill
+  const IT = ITEMS();
+  const locNames_zh={
+    '1F大門':'1F 大門','112教室':'112 教室','108教室':'108 教室',
+    '103教室':'103 教室','216教室':'216 教室','217教室':'217 教室',
+    '210教室':'210 教室','魔光實驗室':'魔光實驗室',
+    'A226教室':'A226 教室','休息區':'休息區','法文系辦':'3F 法文系辦'
+  };
+  const locNames_fr={
+    '1F大門':'1F — Grande Entrée','112教室':'Salle 112','108教室':'Salle 108',
+    '103教室':'Salle 103','216教室':'Salle 216','217教室':'Salle 217',
+    '210教室':'Salle 210','魔光實驗室':'Laboratoire de Lumière Magique',
+    'A226教室':'A226','休息區':'Coin Repos','法文系辦':'3F — Secrétariat'
+  };
+  const locNames = LANG==='zh' ? locNames_zh : locNames_fr;
+  locPill.textContent='📍 '+(locNames[loc]||loc);
+
+  // progress pill
+  if(loc==='法文系辦') progPill.textContent=t('progWin');
+  else if(tanguyDone) progPill.textContent=t('progSign');
+  else progPill.textContent=t('progMain');
+
+  // side pill
+  const hasSide=inv.some(x=>isSide(x));
+  sidePill.style.display=hasSide?'inline':'none';
+  sidePill.textContent=t('sideQuest');
+
+  // inventory
+  if(inv.length===0){
+    invChips.innerHTML=`<span class="chip empty">${t('invEmpty')}</span>`;
+    return;
+  }
+  invChips.innerHTML=inv.map(x=>{
+    const cls=isSide(x)?'chip side':'chip item';
+    return `<span class="${cls}">${x}</span>`;
+  }).join('');
+}
+
+function has(key){ return inv.includes(ITEMS()[key]); }
+function give(key){ const n=ITEMS()[key]; if(!inv.includes(n)) inv.push(n); updateUI(); }
+function take(key){ const n=ITEMS()[key]; inv=inv.filter(x=>x!==n); updateUI(); }
+function go(place){ loc=place; updateUI(); }
+function I(key){ return ITEMS()[key]; }
+
+// ═══════════════════════════════════════════
+//  LOCATION ROUTER
+// ═══════════════════════════════════════════
+function describeLocation(){
+  const old=document.getElementById('choices-wrap');
+  if(old) old.remove();
+  pendingChoice=null;
+  switch(loc){
+    case '1F大門':   return loc1F();
+    case '112教室':  return loc112();
+    case '108教室':  return loc108();
+    case '103教室':  return loc103();
+    case '216教室':  return loc216();
+    case '217教室':  return loc217();
+    case '210教室':  return loc210();
+    case '魔光實驗室': return locLab();
+    case 'A226教室': return locA226();
+    case '休息區':   return locRest();
+    case '法文系辦': return locOffice();
+  }
+}
+
+// ─── NAV HELPERS ───
+function nav1F(){
+  return LANG==='zh' ? [
+    {text:'前往 112 教室',fn:()=>{go('112教室');describeLocation();}},
+    {text:'前往 108 教室',fn:()=>{go('108教室');describeLocation();}},
+    {text:'前往 103 教室',fn:()=>{go('103教室');describeLocation();}},
+    {text:'前往 2F（樓梯）',fn:()=>{msg('你踏上吱呀作響的石階，空氣中漂浮著舊書與蠟燭的氣息。');showChoices(nav2F());}},
+  ] : [
+    {text:'Se rendre en Salle 112',fn:()=>{go('112教室');describeLocation();}},
+    {text:'Se rendre en Salle 108',fn:()=>{go('108教室');describeLocation();}},
+    {text:'Se rendre en Salle 103',fn:()=>{go('103教室');describeLocation();}},
+    {text:'Monter au 2F (escalier)',fn:()=>{msg("Vous gravissez l'escalier en colimaçon. L'air embaume les vieux livres et la cire de bougie.");showChoices(nav2F());}},
+  ];
+}
+function nav2F(){
+  return LANG==='zh' ? [
+    {text:'前往 216 教室',fn:()=>{go('216教室');describeLocation();}},
+    {text:'前往 217 教室',fn:()=>{go('217教室');describeLocation();}},
+    {text:'前往 210 教室',fn:()=>{go('210教室');describeLocation();}},
+    {text:'前往 A226 教室',fn:()=>{go('A226教室');describeLocation();}},
+    {text:'前往 魔光實驗室',fn:()=>{go('魔光實驗室');describeLocation();}},
+    {text:'前往 休息區',fn:()=>{go('休息區');describeLocation();}},
+    {text:'返回 1F',fn:()=>{go('1F大門');describeLocation();}},
+  ] : [
+    {text:'Se rendre en Salle 216',fn:()=>{go('216教室');describeLocation();}},
+    {text:'Se rendre en Salle 217',fn:()=>{go('217教室');describeLocation();}},
+    {text:'Se rendre en Salle 210',fn:()=>{go('210教室');describeLocation();}},
+    {text:'Se rendre en A226',fn:()=>{go('A226教室');describeLocation();}},
+    {text:'Se rendre au Laboratoire de Lumière Magique',fn:()=>{go('魔光實驗室');describeLocation();}},
+    {text:'Se rendre au Coin Repos',fn:()=>{go('休息區');describeLocation();}},
+    {text:'Redescendre au 1F',fn:()=>{go('1F大門');describeLocation();}},
+  ];
+}
+
+// ═══════════════════════════════════════════
+//  1F 大門
+// ═══════════════════════════════════════════
+function loc1F(){
+  if(LANG==='zh'){
+    msg(`霧氣從門縫滲入，系館走廊在晨曦中顯得格外空洞。<br>
+地板上，四樣物品以奇異的方式排列著，彷彿在等待有緣人……<br><br>
+散落在地的物品：${ir(I('CROISSANT'))}、${ir(I('PAPER'))}、${ir(I('PEN'))}、${ir(I('KEY'))}`);
+  } else {
+    msg(`Un brouillard froid s'infiltre sous les portes. Le couloir du département baigne dans une lumière matinale étrangement vide.<br>
+Au sol, quatre objets sont disposés de façon curieuse, comme s'ils attendaient quelqu'un…<br><br>
+Objets au sol : ${ir(I('CROISSANT'))}, ${ir(I('PAPER'))}, ${ir(I('PEN'))}, ${ir(I('KEY'))}`);
+  }
+  const picks=['CROISSANT','PAPER','PEN','KEY'].filter(k=>!has(k)).map(k=>({
+    text:(LANG==='zh'?`拾起 [${I(k)}]`:`Ramasser [${I(k)}]`),
+    fn:()=>{
+      give(k);
+      msg(LANG==='zh'
+        ?`你將 ${itemRef(I(k))} 收入背包。寒涼的質感讓你覺得這旅途並不尋常。`
+        :`Vous glissez ${itemRef(I(k))} dans votre sac. Sa texture froide vous rappelle que ce voyage n'a rien d'ordinaire.`,'ok');
+      describeLocation();
+    }
+  }));
+  showChoices([...picks,...nav1F()]);
+}
+
+// ═══════════════════════════════════════════
+//  112
+// ═══════════════════════════════════════════
+function loc112(){
+  if(!thomasHelped){
+    msg(LANG==='zh'
+      ?`門縫透出昏黃的光。Thomas坐在第一排，以一種近乎超現實的專注盯著桌面。<br>他抬起眼，冷淡地掃了你一眼。<br><em>「……有事？」</em>`
+      :`Un rai de lumière blafarde filtre sous la porte. Thomas fixe son bureau avec une concentration presque surnaturelle.<br>Il lève à peine les yeux et vous jauge d'un regard froid.<br><em>« …Qu'est-ce que vous voulez ? »</em>`);
+    const opts=[];
+    if(has('CROISSANT')) opts.push({
+      text:(LANG==='zh'?`給予 [${I('CROISSANT')}]`:`Offrir le [${I('CROISSANT')}]`),
+      fn:()=>{
+        take('CROISSANT');thomasHelped=true;
+        msg(LANG==='zh'
+          ?`Thomas的眼神瞬間軟化。<br><em>「……謝了。其實二樓有一間魔光實驗室，好像沒人注意到它。<br>至於那個一直徘徊在A226的Tanguy——他對神話很執著，你懂的。」</em>`
+          :`Le regard de Thomas se radoucit instantanément.<br><em>« …Merci. Il y a un Laboratoire de Lumière Magique au deuxième étage — personne ne semble le remarquer.<br>Quant à ce Tanguy qui rôde autour d'A226 — il est obsédé par la mythologie, vous comprenez. »</em>`);
+        describeLocation();
+      }
+    });
+    opts.push({text:(LANG==='zh'?'默默離開':'Repartir sans rien dire'),fn:()=>{go('1F大門');describeLocation();}});
+    showChoices(opts);
+  } else {
+    msg(LANG==='zh'
+      ?`Thomas正安靜地啃著可頌，視線飄向窗外。<br><em>「二樓，魔光實驗室，A226——去吧。」</em>`
+      :`Thomas grignote tranquillement le croissant, le regard perdu vers la fenêtre.<br><em>« Deuxième étage, Laboratoire de Lumière Magique, A226 — allez-y. »</em>`);
+    showChoices([{text:(LANG==='zh'?'離開':'Partir'),fn:()=>{go('1F大門');describeLocation();}}]);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  108
+// ═══════════════════════════════════════════
+function loc108(){
+  if(!bovarySide){
+    msg(LANG==='zh'
+      ?`一股紙墨混合的氣味。甘佳平教授正在黑板上書寫密密麻麻的法文字。<br><em>「啊——你來得正好。我正在整理《包法利夫人》的考試內容，但手邊竟然沒有一張像樣的紙……」</em>`
+      :`Une odeur d'encre et de papier. La Professeure Gan écrit au tableau une série de formules en français serrées.<br><em>« Ah — vous tombez bien. Je prépare les contenus d'examen sur Madame Bovary, mais je n'ai pas une seule feuille digne de ce nom… »</em>`);
+    const opts=[];
+    if(has('PAPER')) opts.push({
+      text:(LANG==='zh'?`給予 [${I('PAPER')}]`:`Donner la [${I('PAPER')}]`),
+      fn:()=>{
+        take('PAPER');bovarySide=true;give('BOVARY_NOTES');
+        msg(LANG==='zh'
+          ?`甘教授接過空白資料，兩眼發亮。<br><em>「這紙質！天哪，這才是值得承載文學的媒介。」</em><br>她奮筆謄寫，鄭重地交到你手中。<br>${sr(I('BOVARY_NOTES'))} 已收入背包。<br><em>「拿著它，等等期末考會考！千萬別弄丟了。」</em>`
+          :`La Professeure Gan saisit la feuille vierge, les yeux brillants.<br><em>« Cette qualité de papier ! Mon Dieu, voilà enfin un support digne de la littérature. »</em><br>Elle rédige une synthèse complète et vous la remet solennellement.<br>${sr(I('BOVARY_NOTES'))} ajouté à l'inventaire.<br><em>« Gardez-la précieusement — l'examen final la portera. »</em>`,'ok');
+        describeLocation();
+      }
+    });
+    opts.push({text:(LANG==='zh'?'點頭離開':"Hocher la tête et partir"),fn:()=>{go('1F大門');describeLocation();}});
+    showChoices(opts);
+  } else {
+    msg(LANG==='zh'
+      ?`甘佳平教授正在滿意地欣賞那份精心謄寫的重點，對你投以感謝的微笑。<br><em>「好好準備考試喔。」</em>`
+      :`La Professeure Gan contemple avec satisfaction le document soigneusement rédigé, et vous adresse un sourire reconnaissant.<br><em>« Bon courage pour l'examen. »</em>`);
+    showChoices([{text:(LANG==='zh'?'離開':'Partir'),fn:()=>{go('1F大門');describeLocation();}}]);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  103
+// ═══════════════════════════════════════════
+function loc103(){
+  // side quest: exam
+  if(has('BOVARY_NOTES') && !examSide){
+    msg(LANG==='zh'
+      ?`你踏入103教室，空氣驟然凝固。座位上竟已備好考卷。<br><strong>📝 福樓拜文法筆試觸發！</strong><br><br>你悄悄翻閱 ${sr(I('BOVARY_NOTES'))}，<br>題目浮現：<strong>「《包法利夫人》中，艾瑪最終的命運為何？」</strong>`
+      :`Vous entrez dans la Salle 103 — l'air se fige aussitôt. Des copies sont mystérieusement disposées sur les tables.<br><strong>📝 Examen écrit de Flaubert déclenché !</strong><br><br>Vous feuilletez discrètement les ${sr(I('BOVARY_NOTES'))},<br>La question apparaît : <strong>« Quel est le destin final d'Emma Bovary ? »</strong>`);
+    if(LANG==='zh') showChoices([
+      {text:'A. 她與情人私奔，遠走他鄉',fn:()=>examAnswer(false)},
+      {text:'B. 她因負債累累、走投無路，服砒霜自盡',fn:()=>examAnswer(true)},
+      {text:'C. 她回到丈夫身邊，過上了平靜的生活',fn:()=>examAnswer(false)},
+    ]); else showChoices([
+      {text:"A. Elle s'enfuit avec son amant, loin de tout",fn:()=>examAnswer(false)},
+      {text:'B. Criblée de dettes et sans issue, elle s\'empoisonne à l\'arsenic',fn:()=>examAnswer(true)},
+      {text:'C. Elle retourne auprès de son mari et mène une vie paisible',fn:()=>examAnswer(false)},
+    ]);
+    return;
+  }
+  // main quest: sign
+  if(has('SIGN') && !exam103Done){
+    msg(LANG==='zh'
+      ?`徐佳華教授在黑板上默寫動詞變化，她瞥見你手中的 ${itemRef(I('SIGN'))}，動作驟停。<br><em>「……你居然拿到了Tanguy的簽名？」</em><br>她在黑板角落畫下一個隱約的箭頭符號。<br><em>「系辦在三樓，沿著符號走，你會找到的。」</em>`
+      :`La Professeure Xu écrit au tableau à une vitesse surnaturelle. En apercevant la ${itemRef(I('SIGN'))} dans votre main, elle s'arrête net.<br><em>« …Vous avez vraiment obtenu la signature de Tanguy ? »</em><br>Elle trace discrètement une flèche dans un coin du tableau.<br><em>« Le Secrétariat est au troisième étage — montez par l'escalier. »</em>`);
+    exam103Done=true;
+    showChoices(LANG==='zh'?[
+      {text:'前往 法文系辦（3F）',fn:()=>{go('法文系辦');describeLocation();}},
+      {text:'稍後再去',fn:()=>{go('1F大門');describeLocation();}},
+    ]:[
+      {text:'Monter au 3F — Secrétariat du Département',fn:()=>{go('法文系辦');describeLocation();}},
+      {text:'Y aller plus tard',fn:()=>{go('1F大門');describeLocation();}},
+    ]);
+    return;
+  }
+  if(exam103Done){
+    msg(LANG==='zh'
+      ?`徐佳華教授繼續上她的初階文法課，對你點頭示意。<br><em>「系辦就在三樓——去吧。」</em>`
+      :`La Professeure Xu poursuit son cours de grammaire débutante et vous adresse un signe de tête.<br><em>« Le Secrétariat est au 3F — allez-y. »</em>`);
+    showChoices(LANG==='zh'?[
+      {text:'前往 法文系辦（3F）',fn:()=>{go('法文系辦');describeLocation();}},
+      {text:'離開',fn:()=>{go('1F大門');describeLocation();}},
+    ]:[
+      {text:'Monter au 3F — Secrétariat',fn:()=>{go('法文系辦');describeLocation();}},
+      {text:'Partir',fn:()=>{go('1F大門');describeLocation();}},
+    ]);
+    return;
+  }
+  msg(LANG==='zh'
+    ?`徐佳華教授的法文文法課正進行得如火如荼——或者說，如冰如霜。<br>她看見你，只是淡淡地瞥了一眼，繼續書寫。`
+    :`Le cours de grammaire française de la Professeure Xu bat son plein — ou plutôt, baigne dans un froid glacial.<br>Elle vous jette un bref regard et continue d'écrire.`);
+  showChoices([{text:(LANG==='zh'?'悄悄退出':'Se retirer discrètement'),fn:()=>{go('1F大門');describeLocation();}}]);
+}
+
+function examAnswer(correct){
+  if(correct){
+    examSide=true; take('BOVARY_NOTES'); give('EXAM_PASS');
+    msg(LANG==='zh'
+      ?`你的筆落在正確的答案上。<br>試卷突然自行飛出教室——帶著甘佳平教授的硃砂印記回到你手中。<br>${sr(I('EXAM_PASS'))} 已收入背包。<br><em>「恭喜，全班唯一及格的人。217教室，去找翁教授報到。」</em>`
+      :`Votre plume se pose sur la bonne réponse.<br>La copie s'envole soudainement hors de la salle — et revient ornée du sceau rouge de la Professeure Gan.<br>${sr(I('EXAM_PASS'))} ajouté à l'inventaire.<br><em>« Félicitations, seul(e) reçu(e) de toute la promotion. » Une voix surgit du néant : « Salle 217 — allez voir la Professeure Weng. »</em>`,'ok');
+    describeLocation();
+  } else {
+    msg(LANG==='zh'
+      ?`你的筆猶豫地落下——答錯了。<br>試卷冒出一縷青煙，化為灰燼。你只能黯然地離開103教室。`
+      :`Votre plume hésite — mauvaise réponse.<br>La copie laisse échapper une volute de fumée bleue et part en cendres.`,'warn');
+    go('1F大門'); describeLocation();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  216
+// ═══════════════════════════════════════════
+function loc216(){
+  if(trapped216){
+    msg(LANG==='zh'
+      ?`你仍然困在216教室。Bruno用哀怨的眼神看著你。<br><em>「拜託⋯⋯沒有你的羽毛筆，我根本沒辦法繼續寫⋯⋯」</em>`
+      :`Vous êtes toujours coincé(e) dans la Salle 216. Bruno vous regarde d'un air suppliant.<br><em>« Je vous en prie… sans votre plume, je ne peux tout simplement pas continuer… »</em>`);
+    const opts=[];
+    if(has('PEN')) opts.push({text:(LANG==='zh'?`給予 [${I('PEN')}]`:`Donner la [${I('PEN')}]`),fn:()=>give216Pen()});
+    else opts.push({text:(LANG==='zh'?'（你沒有羽毛筆，無法離開）':"(Vous n'avez pas la plume — impossible de partir)"),
+      fn:()=>msg(LANG==='zh'?'背包裡空空如也。Bruno繼續哀嘆，房門紋絲不動。':"Votre sac est vide. Bruno continue de se lamenter, la porte ne bouge pas.",'warn')});
+    showChoices(opts); return;
+  }
+  msg(LANG==='zh'
+    ?`一股奇異的吸力從門縫滲出，你不由自主地踏入216教室。<br>Bruno端坐在講台前，試卷散落一地，臉色如石膏般慘白。<br><em>「我的羽毛筆——沒有它我根本沒辦法批改這些考卷。求你了⋯⋯」</em><br>你赫然發現，房門已在你身後悄悄鎖上。`
+    :`Une étrange force d'attraction suinte par l'entrebâillement de la porte — vous y entrez malgré vous.<br>Bruno est effondré sur la chaire, les copies éparpillées partout, le visage livide comme du plâtre.<br><em>« Ma plume — sans elle, impossible de corriger ces copies. Je vous en supplie… »</em><br>Vous réalisez, horrifié(e), que la porte derrière vous s'est silencieusement verrouillée.`);
+  trapped216=true;
+  const opts=[];
+  if(has('PEN')) opts.push({text:(LANG==='zh'?`給予 [${I('PEN')}]`:`Donner la [${I('PEN')}]`),fn:()=>give216Pen()});
+  else opts.push({text:(LANG==='zh'?'試圖離開':'Tenter de sortir'),
+    fn:()=>msg(LANG==='zh'?'房門像被焊死了一樣，紋絲不動。Bruno發出更深重的嘆息。':"La porte est comme soudée. Bruno laisse échapper un soupir encore plus profond.",'warn')});
+  showChoices(opts);
+}
+function give216Pen(){
+  take('PEN'); trapped216=false;
+  msg(LANG==='zh'
+    ?`Bruno接過羽毛筆，整個人瞬間散發出一種近乎神聖的光暈。<br><em>「謝謝你⋯⋯謝謝你。」</em><br>房門發出一聲厚重的解鎖聲，向你緩緩打開。你終於重獲自由。`
+    :`Bruno saisit la plume avec révérence — une aura quasi divine l'enveloppe aussitôt.<br><em>« Merci… merci infiniment. »</em><br>La porte laisse échapper un claquement solennel et s'ouvre lentement devant vous. Vous êtes libre.`,'ok');
+  go('1F大門'); showChoices(nav2F());
+}
+
+// ═══════════════════════════════════════════
+//  217
+// ═══════════════════════════════════════════
+function loc217(){
+  if(has('EXAM_PASS') && !oralSide){
+    msg(LANG==='zh'
+      ?`217教室內，翁振盛教授正對著空氣手舞足蹈，解說著包法利夫人的心理狀態。<br>他瞥見你手中的 ${sr(I('EXAM_PASS'))}，猛然停下動作。<br><em>「你——竟然及格了？！全班就你一個！」</em><br><strong>📢 期末口試觸發！</strong><br><em>「艾瑪包法利，她究竟是個什麼樣的人？」</em>`
+      :`Dans la Salle 217, la Professeure Weng s'agite en tous sens, commentant la psychologie d'Emma Bovary.<br>En apercevant la ${sr(I('EXAM_PASS'))} dans votre main, elle s'immobilise brusquement.<br><em>« Vous — vous avez réussi ?! Seul(e) de toute la promotion ! »</em><br><strong>📢 Oral de fin d'année déclenché !</strong><br><em>« Emma Bovary — quel genre de femme est-elle vraiment ? »</em>`);
+    if(LANG==='zh') showChoices([
+      {text:'A. 浪漫主義者，被現實擊碎的夢想家',fn:()=>oralAnswer(true)},
+      {text:'B. 自私的惡人，罪有應得',fn:()=>oralAnswer(false)},
+      {text:'C. 普通的家庭主婦，沒有特別之處',fn:()=>oralAnswer(false)},
+    ]); else showChoices([
+      {text:'A. Une romantique — une rêveuse brisée par la réalité',fn:()=>oralAnswer(true)},
+      {text:'B. Une femme égoïste, qui méritait son destin',fn:()=>oralAnswer(false)},
+      {text:'C. Une femme ordinaire, sans particularité',fn:()=>oralAnswer(false)},
+    ]);
+    return;
+  }
+  msg(LANG==='zh'
+    ?(oralSide?`翁振盛教授正滿足地喝著茶，對你微微點頭。<br><em>「去吧，享受你的Buffet。」</em>`
+        :`217教室門扉半掩，翁振盛教授正在走廊上踱步，喃喃自語著包法利夫人的章節。<br>課程內容晦澀而迷人，卻與你現在的處境似乎沒有直接關聯。`)
+    :(oralSide?`La Professeure Weng sirote son thé avec satisfaction et vous fait un signe de tête bienveillant.<br><em>« Allez, profitez du Buffet. »</em>`
+        :`La porte de la Salle 217 est entrouverte. La Professeure Weng fait les cent pas, murmurant des passages de Madame Bovary.<br>Le cours est obscur et envoûtant, mais sans lien direct avec votre situation.`));
+  showChoices(nav2F());
+}
+function oralAnswer(correct){
+  if(correct){
+    oralSide=true; take('EXAM_PASS'); give('BUFFET');
+    msg(LANG==='zh'
+      ?`翁振盛教授靜默片刻，而後拍掌大笑。<br><em>「說得好！你是唯一理解她的人。」</em><br>他從抽屜深處取出一張印著燙金花邊的券，鄭重地遞到你手中。<br>${sr(I('BUFFET'))} 已收入背包。<br><em>「去吧，你值得的。」</em>`
+      :`La Professeure Weng reste silencieuse un instant, puis éclate d'un rire chaleureux.<br><em>« Très bien dit ! Vous êtes la seule personne à la comprendre vraiment. »</em><br>Elle tire du fond d'un tiroir un bon aux contours dorés et vous le remet solennellement.<br>${sr(I('BUFFET'))} ajouté à l'inventaire.<br><em>« Allez-y — vous le méritez. »</em>`,'ok');
+    describeLocation();
+  } else {
+    msg(LANG==='zh'
+      ?`翁教授長嘆一口氣，搖搖頭。<br><em>「唉⋯⋯再好好讀讀吧。」</em>`
+      :`La Professeure Weng pousse un long soupir et secoue la tête.<br><em>« Hélas… relisez encore un peu. »</em>`,'warn');
+    describeLocation();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  210
+// ═══════════════════════════════════════════
+function loc210(){
+  msg(LANG==='zh'
+    ?`210教室的燈光泛著奇異的琥珀色。一位你叫不出名字的教授背對著你，在黑板上書寫著不明的符號序列。<br>空氣中漂浮著一種說不清的沉默。他始終沒有轉身，你也沒有打擾他的必要。<br><em>走廊的盡頭似乎還有更多房間等待著你。</em>`
+    :`La Salle 210 baigne dans une lumière ambrée et étrange. Un professeur vous tourne le dos, inscrivant au tableau de mystérieuses séquences de symboles.<br>L'air est suspendu dans un silence inexplicable. Il ne se retourne pas — vous ne voyez aucune raison de le déranger non plus.<br><em>Le couloir semble promettre d'autres découvertes au-delà.</em>`);
+  showChoices(nav2F());
+}
+
+// ═══════════════════════════════════════════
+//  魔光實驗室
+// ═══════════════════════════════════════════
+function locLab(){
+  if(!has('KEY')){
+    msg(LANG==='zh'
+      ?`一扇斑駁的木門佇立在走廊盡頭，銅製門鎖閃著神秘的光澤。<br>門上刻著：<em>「唯有黃銅之鑰，方能開啟探索之門。」</em><br>你試著推門，卻紋絲不動。`
+      :`Une vieille porte patinée se dresse au bout du couloir, son verrou de cuivre luisant d'un éclat mystérieux.<br>Une inscription : <em>« Seule la clé de laiton ouvre la porte de la découverte. »</em><br>Vous essayez de pousser — elle ne cède pas.`);
+    showChoices(nav2F()); return;
+  }
+  if(!has('NOTES')){
+    msg(LANG==='zh'
+      ?`${ir(I('KEY'))} 在鎖孔中轉動，門發出低沉的共鳴聲，緩緩打開。<br>實驗室內部瀰漫著藍紫色的光霧，書架上整齊排列著神話文獻。<br>就在最顯眼的位置，靜靜擺放著一本 ${ir(I('NOTES'))}。`
+      :`La ${ir(I('KEY'))} tourne dans la serrure, et la porte s'ouvre lentement.<br>L'intérieur du laboratoire est noyé dans une brume bleu-violet. Des étagères débordent de documents mythologiques.<br>À l'endroit le plus en vue repose, serein, un volume : ${ir(I('NOTES'))}.`);
+    showChoices([
+      {text:(LANG==='zh'?`拿取 [${I('NOTES')}]`:`Prendre les [${I('NOTES')}]`),
+       fn:()=>{give('NOTES');msg(LANG==='zh'?ir(I('NOTES'))+' 已收入背包。書頁散發著微弱的熱度。':ir(I('NOTES'))+" ajouté à l'inventaire. Les pages dégagent une douce chaleur.",'ok');describeLocation();}},
+      ...nav2F()
+    ]);
+  } else {
+    msg(LANG==='zh'
+      ?`實驗室的魔光依舊瀰漫，但書架上已空出一個缺口——你已取走了那本筆記。`
+      :`La lumière magique du laboratoire continue de baigner la salle, mais une place vide sur l'étagère rappelle que vous avez déjà pris les notes.`);
+    showChoices(nav2F());
+  }
+}
+
+// ═══════════════════════════════════════════
+//  A226 — TANGUY QUIZ
+// ═══════════════════════════════════════════
+const TQ_ZH = [
+  {q:'奧林帕斯十二主神中，司掌智慧與戰爭的女神是？',opts:['阿芙蘿黛蒂（Aphrodite）','雅典娜（Athena）','阿提米絲（Artemis）'],ans:1},
+  {q:'宙斯（Zeus）在羅馬神話中對應的神祇名稱為何？',opts:['馬爾斯（Mars）','朱比特（Jupiter）','尼普頓（Neptune）'],ans:1},
+  {q:'希臘神話中，普羅米修斯（Prometheus）偷取了什麼送給人類？',opts:['火焰','神酒（Ambrosia）','黃金'],ans:0},
+  {q:'特洛伊戰爭的導火線，金蘋果最後由誰獲得？',opts:['雅典娜（Athena）','阿芙蘿黛蒂（Aphrodite）','赫拉（Hera）'],ans:1},
+  {q:'奧德修斯（Odysseus）在返鄉途中，被哪位女神留在島上長達七年？',opts:['克爾刻（Circe）','卡呂普索（Calypso）','塞壬（Siren）'],ans:1},
+  {q:'冥界的統治者黑帝斯（Hades），其羅馬名對應為？',opts:['普魯托（Pluto）','薩圖恩（Saturn）','武爾卡努斯（Vulcanus）'],ans:0},
+  {q:'赫拉克勒斯（Heracles）十二試煉中，第一項任務是殺死哪隻怪獸？',opts:['九頭蛇許德拉（Hydra）','涅墨亞獅子（Nemean Lion）','厄律曼托斯野豬（Erymanthian Boar）'],ans:1},
+  {q:'希臘神話中，誰是音樂與詩歌之神，同時也是太陽神？',opts:['阿波羅（Apollo）','赫密斯（Hermes）','戴歐尼修斯（Dionysus）'],ans:0},
+  {q:'帕爾修斯（Perseus）斬殺梅杜莎（Medusa）後，用她的頭顱將哪位怪物化成石頭？',opts:['克拉肯（Kraken）','泰坦（Titan）','海怪（Cetus）'],ans:2},
+  {q:'伊卡洛斯（Icarus）與父親代達羅斯（Daedalus）用什麼逃離克里特島？',opts:['魔法地毯','蠟製羽翼','神賜飛馬'],ans:1},
+];
+const TQ_FR = [
+  {q:"Parmi les douze dieux de l'Olympe, quelle déesse préside à la sagesse et à la guerre ?",opts:['Aphrodite','Athéna','Artémis'],ans:1},
+  {q:'Quel est le nom romain de Zeus, roi des dieux olympiens ?',opts:['Mars','Jupiter','Neptune'],ans:1},
+  {q:"Qu'a dérobé Prométhée pour l'offrir aux hommes ?",opts:['Le feu',"L'ambroisie",'L\'or des dieux'],ans:0},
+  {q:'Quelle déesse reçut la pomme d\'or « Pour la plus belle » lors du Jugement de Pâris ?',opts:['Athéna','Aphrodite','Héra'],ans:1},
+  {q:'Quelle nymphe retint Ulysse sur son île pendant sept longues années ?',opts:['Circé','Calypso','Nausicaa'],ans:1},
+  {q:"Quel est le nom romain du dieu des Enfers, Hadès ?",opts:['Pluton','Saturne','Vulcain'],ans:0},
+  {q:'Quelle fut la première épreuve imposée à Héraclès lors de ses douze travaux ?',opts:["L'Hydre de Lerne",'Le lion de Némée','Le sanglier d\'Erymanthe'],ans:1},
+  {q:'Quel dieu grec est à la fois dieu du soleil, de la musique et de la poésie ?',opts:['Apollon','Hermès','Dionysos'],ans:0},
+  {q:'Que portait Persée pour vaincre la Méduse sans croiser son regard ?',opts:['Un bouclier-miroir','Un casque d\'invisibilité','Les deux à la fois'],ans:2},
+  {q:"De quoi étaient faites les ailes d'Icare, construites par son père Dédale ?",opts:['Plumes et soie','Cire et plumes','Bronze et cuir'],ans:1},
+];
+
+function startTanguyQuiz(){
+  tanguyQuizActive=true; tanguyCorrect=0; tanguyAnswered=0;
+  const pool = LANG==='zh' ? TQ_ZH : TQ_FR;
+  tanguyQuizQueue=[...pool].sort(()=>Math.random()-0.5);
+  msg(LANG==='zh'
+    ?`Tanguy接過 ${ir(I('NOTES'))}，迅速翻閱，眼神如鷹隼般銳利。<br><em>「不錯。這本筆記……尚可。」</em><br>他闔上筆記，目光直射向你。<br><em>「但光有筆記還不夠。你必須向我證明，你真的理解這些神話。<br>我將出十道題，你需答對三題，方可獲得我的簽名。」</em>`
+    :`Tanguy saisit les ${ir(I('NOTES'))} et les parcourt d'un regard d'aigle.<br><em>« Ces notes… sont acceptables. »</em><br>Il referme le volume d'un geste sec et vous fixe droit dans les yeux.<br><em>« Mais posséder un livre ne signifie pas le comprendre.<br>Je vais vous soumettre dix questions. Répondez-en correctement trois — et vous aurez ma signature. »</em>`);
+  setTimeout(()=>askTanguyQuestion(),400);
+}
+
+function askTanguyQuestion(){
+  if(tanguyAnswered>=TANGUY_TOTAL){endTanguyQuiz();return;}
+  const q=tanguyQuizQueue[tanguyAnswered];
+  const stillNeed=Math.max(0,TANGUY_PASS-tanguyCorrect);
+  msg(LANG==='zh'
+    ?`<em>（第 ${tanguyAnswered+1} / ${TANGUY_TOTAL} 題　已答對 ${tanguyCorrect} 題　尚需答對 ${stillNeed} 題）</em>`
+    :`<em>(Question ${tanguyAnswered+1} / ${TANGUY_TOTAL} — ${tanguyCorrect} correcte(s) — encore ${stillNeed} requise(s))</em>`,'sys');
+  msg(`<strong>「${q.q}」</strong>`);
+  showChoices(q.opts.map((opt,idx)=>({
+    text:String.fromCharCode(65+idx)+'. '+opt,
+    fn:()=>handleTanguyAnswer(idx)
+  })));
+}
+
+function handleTanguyAnswer(chosen){
+  const q=tanguyQuizQueue[tanguyAnswered]; tanguyAnswered++;
+  if(chosen===q.ans){
+    tanguyCorrect++;
+    msg(LANG==='zh'?`<em>「……正確。」</em> Tanguy淡淡地點了點頭。`:`<em>« …Exact. »</em> Tanguy hoche la tête, imperceptiblement.`,'ok');
+  } else {
+    const correct=String.fromCharCode(65+q.ans)+'. '+q.opts[q.ans];
+    msg(LANG==='zh'?`<em>「錯了。正確答案是：${correct}。」</em> Tanguy的眉頭微微皺起。`:`<em>« Faux. La bonne réponse était : ${correct}. »</em> Un pli soucieux barre le front de Tanguy.`,'warn');
+  }
+  const remaining=TANGUY_TOTAL-tanguyAnswered;
+  if(tanguyCorrect>=TANGUY_PASS) setTimeout(()=>endTanguyQuiz(),300);
+  else if(remaining<(TANGUY_PASS-tanguyCorrect)) setTimeout(()=>endTanguyQuiz(),300);
+  else setTimeout(()=>askTanguyQuestion(),300);
+}
+
+function endTanguyQuiz(){
+  tanguyQuizActive=false;
+  if(tanguyCorrect>=TANGUY_PASS){
+    tanguyDone=true; give('SIGN');
+    msg(LANG==='zh'
+      ?`Tanguy靜默片刻，最終點頭。<br><em>「十題中答對了 ${tanguyCorrect} 題。你對神話的理解……算是及格。」</em><br>他取出一枚印有橄欖枝的印章，在一張羊皮紙上蓋下印記，鄭重地遞給你。<br>${ir(I('SIGN'))} 已收入背包。<br><em>「去找103教室吧。那裡有人在等。」</em>`
+      :`Tanguy observe un long silence. Puis, il acquiesce.<br><em>« ${tanguyCorrect} bonnes réponses sur dix. Vous méritez ceci. »</em><br>Il sort un sceau orné d'un rameau d'olivier et l'appose sur un parchemin qu'il vous tend avec solennité.<br>${ir(I('SIGN'))} ajouté à l'inventaire.<br><em>« Allez voir la Professeure Xu en Salle 103. Elle vous indiquera la voie vers le 3F. »</em>`,'ok');
+    describeLocation();
+  } else {
+    msg(LANG==='zh'
+      ?`Tanguy緩緩搖頭，將你的筆記推回桌面。<br><em>「十題中只答對了 ${tanguyCorrect} 題——遠遠不夠。<br>回去好好研讀，再來挑戰。」</em><br>他轉身繼續在黑板上繪製奧林帕斯的系譜圖，不再理會你。`
+      :`Tanguy secoue lentement la tête et vous restitue vos notes.<br><em>« ${tanguyCorrect} bonne(s) réponse(s) sur dix — c'est insuffisant.<br>Relisez attentivement, et revenez me voir. »</em><br>Il se retourne vers son tableau et ne vous accorde plus un seul regard.`,'warn');
+    showChoices(nav2F());
+  }
+}
+
+function locA226(){
+  if(tanguyDone){
+    msg(LANG==='zh'
+      ?`Tanguy正靜靜地在黑板上繪製奧林帕斯山的系譜圖，偶爾對你投以滿意的眼神。<br><em>「你的表現，我銘記在心。去找系辦吧。」</em>`
+      :`Tanguy dessine calmement au tableau l'arbre généalogique de l'Olympe, et vous gratifie de temps à autre d'un regard approbateur.<br><em>« Votre parcours, je ne l'oublierai pas. Le 3F vous attend. »</em>`);
+    showChoices(nav2F()); return;
+  }
+  msg(LANG==='zh'
+    ?`A226教室的門在你推開時發出奇異的和聲。<br>Tanguy站在講台上，眼神銳利，手指輕敲著一本厚重的神話辭典。<br><em>「聽說你在尋找某樣東西。」</em><br>他的視線掃過你的背包。`
+    :`La porte d'A226 résonne d'un accord étrange lorsque vous la poussez.<br>Tanguy se lève lentement de derrière son bureau, le regard acéré, tapotant un épais dictionnaire de mythologie.<br><em>« On m'a dit que vous cherchez quelque chose. »</em>`);
+  if(!has('NOTES')){
+    msg(LANG==='zh'
+      ?`<em>「……你連 ${ir(I('NOTES'))} 都沒有，憑什麼跟我談？<br>先去找到那本筆記，再拿來給我看。」</em><br>他冷冷地揮手示意你離開。`
+      :`Son regard balaye votre sac — et se durcit.<br><em>« …Vous n'avez même pas les ${ir(I('NOTES'))} ? Revenez quand vous les aurez. Nous n'avons rien à nous dire. »</em><br>Il se rassoit et vous tourne le dos.`,'warn');
+    showChoices(nav2F());
+  } else {
+    msg(LANG==='zh'
+      ?`他的目光落在你手中的 ${ir(I('NOTES'))} 上，眼神一凜。<br><em>「你帶來了筆記。那麼——我需要驗收一下你是否真正研讀過它。」</em>`
+      :`Son regard s'attarde sur les ${ir(I('NOTES'))} dans votre sac.<br><em>« Ces notes… intéressant. Mais je dois m'assurer que vous les avez réellement lues. »</em>`,'sys');
+    showChoices([
+      {text:(LANG==='zh'?`繳交 [${I('NOTES')}] 並接受測驗`:`Remettre les [${I('NOTES')}] et accepter l'épreuve`),
+       fn:()=>{take('NOTES');startTanguyQuiz();}},
+      {text:(LANG==='zh'?'暫時離開':'Repartir pour l\'instant'),fn:()=>{go('1F大門');describeLocation();}},
+    ]);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  休息區
+// ═══════════════════════════════════════════
+function locRest(){
+  if(has('BUFFET')){
+    take('BUFFET'); buffetUsed=true;
+    msg(LANG==='zh'
+      ?`你推開玻璃門，眼前出現了一片令人難以置信的景象：<br>長桌上擺滿了法式料理、鮮花與蠟燭，空氣中飄著誘人的香氣。<br>你亮出 ${sr(I('BUFFET'))}，服務生微笑引你入座。<br><br>幸福的滋味瞬間撕裂了所有幻覺。<br><em>你神清氣爽，可以自由穿過休息區。</em>`
+      :`Vous poussez la porte vitrée — le spectacle qui s'offre à vous est presque incroyable :<br>Une longue table chargée de plats français, de fleurs et de bougies.<br>Vous présentez le ${sr(I('BUFFET'))}, et un serveur vous accueille avec le sourire.<br><br>Le bonheur de cet instant déchire toutes les illusions.<br><em>Vous vous sentez rafraîchi(e) et pouvez circuler librement dans le Coin Repos.</em>`,'ok');
+    showChoices(nav2F());
+  } else {
+    msg(LANG==='zh'
+      ?`一股甜蜜的香氣從休息區飄來，帶著一種幾乎讓人無法抗拒的誘惑。<br>你推開門——<br><br><strong>光線扭曲，地板消失，走廊無限延伸……</strong><br><br>幻覺將你吞噬。當你再次睜開眼睛，你發現自己回到了……`
+      :`Un parfum suave émane du Coin Repos — une tentation à laquelle il est presque impossible de résister.<br>Vous ouvrez la porte —<br><br><strong>La lumière se distord, le sol disparaît, le couloir s'étire à l'infini…</strong><br><br>L'hallucination vous engloutit. Quand vous rouvrez les yeux, vous vous retrouvez…`,'warn');
+    setTimeout(()=>{
+      go('1F大門');
+      msg(LANG==='zh'
+        ?'…… <strong>1F 大門</strong>。<br>背包中的物品完好如初，只是記憶中多了一片無法言說的迷霧。'
+        :"… <strong>à la Grande Entrée du 1F.</strong><br>Votre sac est intact, mais votre mémoire porte la trace d'un brouillard indicible.",'sys');
+      const picks=['CROISSANT','PAPER','PEN','KEY'].filter(k=>!has(k)).map(k=>({
+        text:(LANG==='zh'?`拾起 [${I(k)}]`:`Ramasser [${I(k)}]`),
+        fn:()=>{give(k);msg(LANG==='zh'?`你將 ${itemRef(I(k))} 收入背包。`:(`Vous glissez ${itemRef(I(k))} dans votre sac.`),'ok');describeLocation();}
+      }));
+      showChoices([...picks,...nav1F()]);
+    },600);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  法文系辦
+// ═══════════════════════════════════════════
+function locOffice(){
+  msg(LANG==='zh'
+    ?`走廊盡頭，一扇門，門牌斑駁地寫著「法文系辦」。<br>你緩緩推開它——<br><br>一片溫暖的光線湧入。辦公室裡的教授們抬起頭，臉上浮現出難以置信的表情。<br><em>「你⋯⋯你真的來了。」</em><br><br>你完成了這場冒險。`
+    :`Au bout du couloir du troisième étage, une porte dont la plaque porte l'inscription « Secrétariat du Département de Français ».<br>Vous l'ouvrez lentement —<br><br>Une lumière dorée se déverse dans la pièce. Les professeurs lèvent la tête, l'incrédulité sur le visage.<br><em>« Vous… vous êtes vraiment venu(e) jusqu'au 3F. »</em><br><br>Vous avez achevé cette aventure.`,'gm');
+  setTimeout(()=>{ document.getElementById('victory').classList.add('show'); },800);
+}
+
+// ═══════════════════════════════════════════
+//  INPUT
+// ═══════════════════════════════════════════
+function handleInput(){
+  const raw=inputEl.value.trim(); if(!raw) return;
+  inputEl.value='';
+  msg('▷ '+raw,'player');
+  const t=raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  // room navigation
+  const roomMap={'112':()=>{go('112教室');describeLocation();},'108':()=>{go('108教室');describeLocation();},'103':()=>{go('103教室');describeLocation();},'216':()=>{go('216教室');describeLocation();},'217':()=>{go('217教室');describeLocation();},'210':()=>{go('210教室');describeLocation();},'226':()=>{go('A226教室');describeLocation();}};
+  for(const [k,fn] of Object.entries(roomMap)) if(t.includes(k)){fn();return;}
+
+  // ZH keywords
+  if(LANG==='zh'){
+    if(t.includes('實驗室')||t.includes('labo')){go('魔光實驗室');describeLocation();return;}
+    if(t.includes('休息')||t.includes('repos')){go('休息區');describeLocation();return;}
+    if(t.includes('系辦')){if(exam103Done){go('法文系辦');describeLocation();}else msg('你感覺某條路還未開啟，系辦的方向依舊模糊不清。','warn');return;}
+    if(t.includes('1f')||t.includes('一樓')){go('1F大門');describeLocation();return;}
+    if((t.includes('返回')||t.includes('離開'))&&loc!=='1F大門'){go('1F大門');describeLocation();return;}
+  } else {
+    if(t.includes('labo')||t.includes('laboratoire')){go('魔光實驗室');describeLocation();return;}
+    if(t.includes('repos')){go('休息區');describeLocation();return;}
+    if(t.includes('secretariat')||t.includes('3f')){if(exam103Done){go('法文系辦');describeLocation();}else msg("Un chemin semble encore fermé — la direction du Secrétariat reste floue.",'warn');return;}
+    if(t.includes('1f')){go('1F大門');describeLocation();return;}
+    if((t.includes('partir')||t.includes('sortir'))&&loc!=='1F大門'){go('1F大門');describeLocation();return;}
+  }
+
+  // item pickup / give fallback
+  msg(LANG==='zh'
+    ?'四周的空氣輕輕震動，卻沒有給出明確的回應。<br>或許試試其他方向，或點選下方選項？'
+    :"L'air environnant frémit légèrement, sans donner de réponse claire.<br>Essayez peut-être une autre direction, ou choisissez une option ci-dessous.",'sys');
+  if(loc) describeLocation();
+}
+
+// ═══════════════════════════════════════════
+//  RESTART
+// ═══════════════════════════════════════════
+function restartGame(){
+  inv=[];loc='1F大門';
+  trapped216=false;thomasHelped=false;tanguyDone=false;
+  exam103Done=false;bovarySide=false;examSide=false;oralSide=false;
+  buffetUsed=false;pendingChoice=null;
+  tanguyQuizActive=false;tanguyQuizQueue=[];tanguyCorrect=0;tanguyAnswered=0;
+  document.getElementById('victory').classList.remove('show');
+  logEl.innerHTML='';
+  applyLangUI();
+  describeLocation();
+}
+
+// ── INIT ──
+document.getElementById('user-input').addEventListener('keydown',e=>{if(e.key==='Enter')handleInput();});
+document.documentElement.setAttribute('data-lang','zh');
+restartGame();
+</script>
+</body>
+</html>
